@@ -106,7 +106,6 @@ Error performing query: error: relation "votes" does not exist
 
 ----------------------------------------------------------------------------------------------------------
 
-
 Question : 5. Some jargons (just names are enough- dont need sentences) that you learnt from the  Training session
 
 Answer:
@@ -124,6 +123,7 @@ Answer:
 -> RS, RC , DS
 -> PV , PVC
 
+------------------------------------------------------------------------------------------------------------------
 
 Replica Set Question: Write a common use-case, where you will use a daemon set instead of replica set
 
@@ -132,7 +132,11 @@ DS is used when same application needs to run in all nodes of the cluster.
 The most common use case is for logging, when each of the pod needs to have a logger instance
 so then there will be exactly one pod per node.
 
-Deployment Question: Suppose you have deployed your application using a deployment controller. Assume the initial number of replicas is one. Write the steps needed to update a container's image using deployment, making sure that there is zero downtime.
+------------------------------------------------------------------------------------------------------------------
+
+Deployment Question: Suppose you have deployed your application using a deployment controller. 
+Assume the initial number of replicas is one. 
+Write the steps needed to update a container's image using deployment, making sure that there is zero downtime.
 
 Answer:
 1. Update the container image in the deployment configuration.
@@ -143,8 +147,12 @@ Answer:
 6. Scale down the original deployment gradually.
 7. Verify the successful rolling update.
 
+---------------------------------------------------------------------------------------------------------------------
 
-Service Question: You have deployed an application, that is listening at port 8000. You used a replica-set to deploy it and created a NodePort service to make it accessible. But when you test it, somehow the application is not reachable at the port. Write down your approach and sequentially all the steps that you will take to find out the issue.
+Service Question: You have deployed an application, that is listening at port 8000. 
+You used a replica-set to deploy it and created a NodePort service to make it accessible. 
+But when you test it, somehow the application is not reachable at the port. 
+Write down your approach and sequentially all the steps that you will take to find out the issue.
 
 Answer:
 1. Check the yaml file used to deploy the NodePort service if it has set the port needed
@@ -152,3 +160,4 @@ Answer:
 3. Check for port mapping
 4. Check by running curl command <ip>:8000 if its reachable
 
+------------------------------------------------------------------------------------------------------------------------
