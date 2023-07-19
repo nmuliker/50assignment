@@ -1,0 +1,122 @@
+Question : what happens after voter pod deletion?
+
+After voter pod deletion 
+-> new voter pod is up
+-> no changes in UI for voting or result
+-> new votes registered
+
+
+[root@ip-172-31-39-16 k8s-specifications]# kubectl delete pod vote-94849dc97-7fbbs
+pod "vote-94849dc97-7fbbs" deleted
+[root@ip-172-31-39-16 k8s-specifications]#  kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-md4m6        1/1     Running   0          35m
+redis-868d64d78-mch68     1/1     Running   0          35m
+result-5d57b59f4b-xvd67   1/1     Running   0          35m
+vote-94849dc97-l7d58      1/1     Running   0          4s
+worker-dd46d7584-fbcm2    1/1     Running   0          35m
+
+
+[root@ip-172-31-39-16 k8s-specifications]# kubectl logs worker-dd46d7584-fbcm2
+Waiting for db
+Waiting for db
+Waiting for db
+Connected to db
+Found redis at 10.97.13.18
+Connecting to redis
+Processing vote for 'a' by 'ee4bfe5ac646f91'
+Processing vote for 'b' by 'ee4bfe5ac646f91'
+Processing vote for 'b' by 'ee4bfe5ac646f91'
+Processing vote for 'b' by '18e92d8bd02a84'
+Processing vote for 'a' by '18e92d8bd02a84'
+Processing vote for 'b' by '18e92d8bd02a84'
+Processing vote for 'a' by '308bc7753288263'
+
+---------------------------------------------------------------------------------------------
+
+Question : what happens after worker pod deletion?
+
+After worker pod deletion
+-> logs for older votes lost
+-> new votes logs captured in worker node
+-> UI for both voter and result working
+-> older votes also accounted for
+
+
+[root@ip-172-31-39-16 k8s-specifications]# kubectl delete pod worker-dd46d7584-fbcm2
+pod "worker-dd46d7584-fbcm2" deleted
+[root@ip-172-31-39-16 k8s-specifications]#  kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-md4m6        1/1     Running   0          36m
+redis-868d64d78-mch68     1/1     Running   0          36m
+result-5d57b59f4b-xvd67   1/1     Running   0          36m
+vote-94849dc97-l7d58      1/1     Running   0          70s
+worker-dd46d7584-npvj8    1/1     Running   0          9s
+[root@ip-172-31-39-16 k8s-specifications]# kubectl logs worker-dd46d7584-npvj8
+Connected to db
+Found redis at 10.97.13.18
+Connecting to redis
+Processing vote for 'b' by 'ee4bfe5ac646f91'
+Processing vote for 'b' by '2b0e84827e94a46'
+
+-----------------------------------------------------------------------------------------------------
+
+Question :  what happens after db pod deletion?
+
+After DB pod deletion
+-> voter UI working
+-> result UI showing 0 votes - no data retained as pod is stateless
+-> Once the db pod was deleted there was no data stored about previous votes
+-> Observed restart in result pod
+-> To show vote result, have to enter votes again
+
+
+[root@ip-172-31-39-16 result]# kubectl delete pod db-b54cd94f4-md4m6
+pod "db-b54cd94f4-md4m6" deleted
+[root@ip-172-31-39-16 result]#  kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-pchpg        1/1     Running   0          42s
+redis-868d64d78-mch68     1/1     Running   0          45m
+result-5d57b59f4b-xvd67   1/1     Running   1          45m
+vote-94849dc97-l7d58      1/1     Running   0          10m
+worker-dd46d7584-npvj8    1/1     Running   1          9m6s
+
+
+[root@ip-172-31-39-16 result]# kubectl logs worker-dd46d7584-npvj8
+Connected to db
+Found redis at 10.97.13.18
+Connecting to redis
+Processing vote for 'a' by 'ee4bfe5ac646f91'
+Processing vote for 'b' by '63ec568826d887c'
+Processing vote for 'a' by '63ec568826d887c'
+
+
+[root@ip-172-31-39-16 result]# kubectl logs result-5d57b59f4b-xvd67
+Tue, 18 Jul 2023 06:25:20 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at server.js:73:9
+Tue, 18 Jul 2023 06:25:20 GMT body-parser deprecated undefined extended: provide extended option at ../node_modules/body-parser/index.js:104:29
+App running on port 80
+Connected to db
+Error performing query: error: relation "votes" does not exist
+Error performing query: error: relation "votes" does not exist
+Error performing query: error: relation "votes" does not exist
+
+
+----------------------------------------------------------------------------------------------------------
+
+
+Question : 5. Some jargons (just names are enough- dont need sentences) that you learnt from the  Training session
+
+
+-> Virtualization/Containerzation
+-> Containers/Pods/Images/Layers
+-> Dockerfile
+-> Docker Swarm/ Dcoker Hub
+-> Microservices(Polyglot, Resource allocation, patches)
+-> Kubernetes setup - master worker relationship
+-> Labels, namespaces
+-> Tainting
+-> Circuit Breaking
+-> Services (ClusterIP,NodePort,Ingress, Load Balancer)
+-> Deployment
+-> RS, RC , DS
+-> PV , PVC
